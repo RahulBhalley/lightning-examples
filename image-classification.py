@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     model = ImageClassificationAlgorithm(opts)
     trainer = pl.Trainer(
-        max_steps=opts.max_steps,
+        max_epochs=opts.max_epochs,
         accumulate_grad_batches=opts.accumulate_grad_batches,
         precision=opts.precision,
         accelerator=opts.accelerator,
