@@ -65,6 +65,7 @@ def get_opts():
     parser.add_argument('--persistent_workers', default=False, action="store_true")
     parser.add_argument('--learning_rate', default=0.5, type=float, help='Optimizer learning rate')
     parser.add_argument('--optim_name', default='adam', type=str, help='Which optimizer to use')
+    parser.add_argument("--reload_dataloaders_every_n_epochs", default=1, type=int, help="Reloads dataloaders after what epoch?")
     opts = parser.parse_args()
     return opts
 
@@ -95,7 +96,8 @@ if __name__ == "__main__":
         precision=opts.precision,
         accelerator=opts.accelerator,
         devices=opts.devices,
-        strategy=opts.strategy
+        strategy=opts.strategy,
+        reload_dataloaders_every_n_epochs=opts.reload_dataloaders_every_n_epochs
     )
     trainer.fit(model, trainloader)
     
