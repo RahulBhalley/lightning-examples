@@ -96,7 +96,7 @@ if __name__ == "__main__":
         precision=opts.precision,
         accelerator=opts.accelerator,
         devices=opts.devices,
-        # strategy=opts.strategy,
+        strategy=opts.strategy,
         reload_dataloaders_every_n_epochs=opts.reload_dataloaders_every_n_epochs
     )
     trainer.fit(model, trainloader)
