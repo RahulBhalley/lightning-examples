@@ -74,7 +74,7 @@ def train(opts, accelerator):
     # Start training
     loss = 0.0
     for epoch in range(opts.max_epochs):
-        for batch in tqdm(dataloader, desc=f"[Epoch: {epoch}] | [Loss: {loss}]"):
+        for batch in tqdm(dataloader, desc=f"[Epoch: {epoch} | Loss: {loss}]"):
             optimizer.zero_grad()
             inputs, targets = batch
             preds = model(inputs)
