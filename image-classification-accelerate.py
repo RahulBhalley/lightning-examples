@@ -75,18 +75,19 @@ def train(opts, accelerator):
 
     # Start training
     loss = 0.0
-    for batch in tqdm(dataloader, desc=f"loss: {loss}"):
-        optimizer.zero_grad()
-        inputs, targets = batch
-        preds = model(inputs)
-        loss = F.cross_entropy(preds, targets)
-        accelerator.backward(loss)
-        optimizer.step()
+    for epoch in opts.max_epochs:
+        for batch in tqdm(dataloader, desc=f"[Epoch: {epoch}] | [Loss: {loss}]"):
+            optimizer.zero_grad()
+            inputs, targets = batch
+            preds = model(inputs)
+            loss = F.cross_entropy(preds, targets)
+            accelerator.backward(loss)
+            optimizer.step()
 
 def get_opts():
     parser = ArgumentParser()
     parser.add_argument("--network", default="resnet50", type=str)
-    parser.add_argument("--max_epochs", default=2, type=int)
+    parser.add_argument("--max_epochs", default=50, type=int)
     parser.add_argument('--accelerator', default='auto', type=str, help='Supports passing different accelerator types (“cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”) as well as custom accelerator instances')
     parser.add_argument('--devices', default=None, type=int, help='Will be mapped to either gpus, tpu_cores, num_processes or ipus, based on the accelerator type')
     parser.add_argument('--strategy', default=None, type=str, help='Strategy controls the model distribution across training, evaluation, and prediction to be used by the Trainer')
