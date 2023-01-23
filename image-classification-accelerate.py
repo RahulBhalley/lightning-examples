@@ -16,9 +16,8 @@ print(f"PyTorch version: {torch.__version__}")
 print(f"Lighting version: {pl.__version__}")
 print(f"CPU cores: {cpu_count()}")
 
-accelerator = Accelerator()
 
-def get_device():
+def get_device(accelerator):
     return accelerator.device
 
 def get_model(opts):
@@ -59,10 +58,10 @@ def get_dataloader(opts):
 def get_loss_fn():
     pass
 
-def train(opts):
+def train(opts, accelerator):
 
     # get everything!
-    device = get_device()
+    device = get_device(accelerator)
     dataloader = get_dataloader(opts)
     model = get_model(opts)
     # loss_fn = get_loss_fn(opts)
@@ -105,10 +104,12 @@ def get_opts():
 
 if __name__ == "__main__":
 
+    accelerator = Accelerator()
+
     # Get opts
     opts = get_opts()
     
     # Begin training
-    train(opts)
+    train(opts, accelerator)
 
     print("OMFN, training finished!")
