@@ -4,7 +4,6 @@ import torch.nn.functional as F
 from torchvision.datasets import CIFAR10, FakeData, CelebA
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, models
-import pytorch_lightning as pl
 from accelerate import Accelerator
 # from efficientnet_pytorch import EfficientNet
 from tqdm import tqdm
@@ -13,7 +12,6 @@ from multiprocessing import cpu_count
 from argparse import ArgumentParser
 
 print(f"PyTorch version: {torch.__version__}")
-print(f"Lighting version: {pl.__version__}")
 print(f"CPU cores: {cpu_count()}")
 
 
