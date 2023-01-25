@@ -107,7 +107,9 @@ if __name__ == "__main__":
 
     accelerator = Accelerator(
         distributed_type=DistributedType("TPU"),
-        use_distributed=True
+        use_distributed=True,
+        num_processes=8,
+        mixed_precision='bf16'
     )
 
     # Get opts
