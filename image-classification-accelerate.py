@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torchvision.datasets import CIFAR10, FakeData, CelebA
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, models
-from accelerate import Accelerator
+from accelerate import Accelerator, DistributedType
 # from efficientnet_pytorch import EfficientNet
 from tqdm import tqdm
 # from tqdm.notebook import trange
@@ -105,7 +105,10 @@ def get_opts():
 
 if __name__ == "__main__":
 
-    accelerator = Accelerator()
+    accelerator = Accelerator(
+        distributed_type=DistributedType("TPU"),
+        use_distributed=True
+    )
 
     # Get opts
     opts = get_opts()
