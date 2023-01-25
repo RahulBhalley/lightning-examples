@@ -105,12 +105,12 @@ def get_opts():
 
 if __name__ == "__main__":
 
-    accelerator = Accelerator(
-        distributed_type=DistributedType("TPU"),
-        use_distributed=True,
-        num_processes=8,
-        mixed_precision='bf16'
-    )
+    accelerator = Accelerator()
+
+    accelerator.distributed_type = DistributedType("TPU")
+    accelerator.use_distributed=True
+    accelerator.num_processes=8
+    accelerator.mixed_precision='bf16'
 
     # Get opts
     opts = get_opts()
