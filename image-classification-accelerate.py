@@ -103,7 +103,7 @@ def get_opts():
     opts = parser.parse_args()
     return opts
 
-if __name__ == "__main__":
+def main():
 
     accelerator = Accelerator()
 
@@ -113,4 +113,4 @@ if __name__ == "__main__":
     # Begin training
     train(opts, accelerator)
 
-    print("OMFN, training finished!")
+    print("OMFG, training finished!")
