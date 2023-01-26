@@ -32,11 +32,11 @@ def get_model(opts):
     elif opts.network == "mobilenet_v3_small":
         return models.mobilenet_v3_small(False)
     elif opts.network == "efficientnet_b0":
-        return models.efficientnet_b0()
+        return models.efficientnet_b0(False)
     elif opts.network == "efficientnet_b5":
-        return models.efficientnet_b5()
+        return models.efficientnet_b5(False)
     elif opts.network == "efficientnet_b7":
-        return models.efficientnet_b7()
+        return models.efficientnet_b7(False)
 
 def get_optimizer(opts, model):
     if opts.optim_name == "adam":
