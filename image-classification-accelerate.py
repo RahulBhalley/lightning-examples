@@ -122,3 +122,6 @@ def main():
     train(opts, accelerator)
 
     print("OMFG, training finished!")
+
+if __name__ == "__main__":
+    main()
