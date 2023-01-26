@@ -44,7 +44,13 @@ def get_dataloader(opts):
         transforms.Resize((opts.image_size, opts.image_size)),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    train_dataset = CIFAR10(root='.', train=True,  download=True, transform=transform)
+    # train_dataset = CIFAR10(root='.', train=True,  download=True, transform=transform)
+    train_dataset = FakeData(
+        size=1_000_000,
+        image_size=(3, 224, 224),
+        num_classes=1000,
+        transform=transform
+    )
     trainloader = DataLoader(
         train_dataset,
         batch_size=opts.batch_size,
@@ -86,13 +92,15 @@ def train(opts, accelerator):
 
 def get_opts():
     parser = ArgumentParser()
-    parser.add_argument("--network", default="resnet50", type=str)
     parser.add_argument("--max_epochs", default=50, type=int)
     parser.add_argument('--accelerator', default='auto', type=str, help='Supports passing different accelerator types (“cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”) as well as custom accelerator instances')
     parser.add_argument('--devices', default=None, type=int, help='Will be mapped to either gpus, tpu_cores, num_processes or ipus, based on the accelerator type')
     parser.add_argument('--strategy', default=None, type=str, help='Strategy controls the model distribution across training, evaluation, and prediction to be used by the Trainer')
     parser.add_argument('--precision', default=32, type=Union[int, str], help='Double precision (64), full precision (32), half precision (16) or bfloat16 precision (bf16). Can be used on CPU, GPU, TPUs, HPUs or IPUs. Default: 32')
     parser.add_argument('--accumulate_grad_batches', default=None, type=int, help='Accumulates grads every k batches or as set up in the dict. Default: None')
+    parser.add_argument("--network", default="resnet50", type=str)
+    parser.add_argument("--num_images", default=1_000_000, type=int)
+    parser.add_argument("--num_classes", default=1000, type=int)
     parser.add_argument('--batch_size', default=16, type=int, help='Batch size for training')
     parser.add_argument("--image_size", default=224, type=int, help="The image size of dataset.")
     parser.add_argument('--workers', default=cpu_count(), type=int, help='Number of train dataloader workers')
