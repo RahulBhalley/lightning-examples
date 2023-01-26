@@ -44,13 +44,13 @@ def get_dataloader(opts):
         transforms.Resize((opts.image_size, opts.image_size)),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    # train_dataset = CIFAR10(root='.', train=True,  download=True, transform=transform)
-    train_dataset = FakeData(
-        size=1_000_000,
-        image_size=(3, 224, 224),
-        num_classes=1000,
-        transform=transform
-    )
+    train_dataset = CIFAR10(root='.', train=True,  download=True, transform=transform)
+    # train_dataset = FakeData(
+    #     size=1_000_000,
+    #     image_size=(3, 224, 224),
+    #     num_classes=1000,
+    #     transform=transform
+    # )
     trainloader = DataLoader(
         train_dataset,
         batch_size=opts.batch_size,
