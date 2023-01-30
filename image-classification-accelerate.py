@@ -4,7 +4,8 @@ import torch.nn.functional as F
 from torchvision.datasets import CIFAR10, FakeData, CelebA
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, models
-from accelerate import Accelerator, set_seed
+from accelerate import Accelerator
+from accelerate.utils import set_seed
 # from efficientnet_pytorch import EfficientNet
 from tqdm import tqdm
 # from tqdm.notebook import trange
