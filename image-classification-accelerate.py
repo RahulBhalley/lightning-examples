@@ -104,6 +104,7 @@ def train(opts, accelerator):
             loss /= opts.gradient_accumulation_steps
             accelerator.backward(loss)
 
+            # Reference: https://kozodoi.me/python/deep%20learning/pytorch/tutorial/2021/02/19/gradient-accumulation.html#3.-How-to-make-it-work
             # It's time to update the weights using accumulated gradients.
             if ((batch_idx + 1) % opts.gradient_accumulation_steps == 0) or (batch_idx + 1 == len(dataloader)):
                 # Now that the gradients were being accumulated by optimizer,
