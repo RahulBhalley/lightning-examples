@@ -94,7 +94,8 @@ def train(opts, accelerator):
     # Start training
     for epoch in range(opts.max_epochs):
         # loss = 0.0
-        for batch_idx, inputs, targets in tqdm(enumerate(dataloader), desc=f"[Epoch: {epoch} | Loss: {loss}]"):
+        # for batch_idx, inputs, targets in tqdm(enumerate(dataloader), desc=f"[Epoch: {epoch} | Loss: {loss}]"):
+        for batch_idx, inputs, targets in tqdm(enumerate(dataloader), desc=f"[Epoch: {epoch}]"):
 
             preds = model(inputs)
             loss = F.cross_entropy(preds, targets)
