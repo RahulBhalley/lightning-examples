@@ -95,7 +95,7 @@ def train(opts, accelerator):
     for epoch in range(opts.max_epochs):
         # loss = 0.0
         # for batch_idx, inputs, targets in tqdm(enumerate(dataloader), desc=f"[Epoch: {epoch} | Loss: {loss}]"):
-        for batch_idx, batch in enumerate(tqdm(dataloader), desc=f"[Epoch: {epoch}]"):
+        for batch_idx, batch in enumerate(tqdm(dataloader, desc=f"[Epoch: {epoch}]")):
 
             # Forward pass and compute loss.
             inputs, targets = batch
