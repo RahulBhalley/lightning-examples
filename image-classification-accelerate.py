@@ -49,7 +49,6 @@ def get_dataloader(opts):
         transforms.Resize((opts.image_size, opts.image_size)),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    if opts.num
     if opts.dataset == "cifar10":
         train_dataset = CIFAR10(
             root='.', 
