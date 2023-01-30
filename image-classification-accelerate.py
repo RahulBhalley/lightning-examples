@@ -93,14 +93,24 @@ def train(opts, accelerator):
 
     # Start training
     for epoch in range(opts.max_epochs):
-        loss = 0.0
-        for batch in tqdm(dataloader, desc=f"[Epoch: {epoch} | Loss: {loss}]"):
-            optimizer.zero_grad()
-            inputs, targets = batch
+        # loss = 0.0
+        for batch_idx, inputs, targets in tqdm(enumerate(dataloader), desc=f"[Epoch: {epoch} | Loss: {loss}]"):
+
             preds = model(inputs)
             loss = F.cross_entropy(preds, targets)
+
+            # Downscale the loss to account for accumulation steps.
+            loss /= opts.gradient_accumulation_steps
             accelerator.backward(loss)
-            optimizer.step()
+
+            # It's time to update the weights using accumulated gradients.
+            if ((batch_idx + 1) % opts.gradient_accumulation_steps == 0) or (batch_idx + 1 == len(dataloader)):
+                # Now that the gradients were being accumulated by optimizer,
+                # just update the weights now.
+                optimizer.step()
+
+                # Also set the opimizer gradients to zero again. :)
+                optimizer.zero_grad()
 
 def get_opts():
 
@@ -145,10 +155,10 @@ def get_opts():
         help='Double precision (64), full precision (32), half precision (16) or bfloat16 precision (bf16). Can be used on CPU, GPU, TPUs, HPUs or IPUs. Default: 32'
     )
     parser.add_argument(
-        '--accumulate_grad_batches', 
-        default=None, 
+        '--gradient_accumulation_steps', 
+        default=1, 
         type=int, 
-        help='Accumulates grads every k batches or as set up in the dict. Default: None'
+        help='Accumulates grads every k batches or as set up in the dict. Default: 1'
     )
     parser.add_argument(
         "--network", 
