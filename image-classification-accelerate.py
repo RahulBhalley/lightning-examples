@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torchvision.datasets import CIFAR10, FakeData, CelebA
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, models
-from accelerate import Accelerator, DistributedType
+from accelerate import Accelerator, set_seed
 # from efficientnet_pytorch import EfficientNet
 from tqdm import tqdm
 # from tqdm.notebook import trange
@@ -12,6 +12,7 @@ import os
 from multiprocessing import cpu_count
 from argparse import ArgumentParser
 from typing import Union
+import random
 
 print(f"PyTorch version: {torch.__version__}")
 print(f"CPU cores: {cpu_count()}")
@@ -48,13 +49,21 @@ def get_dataloader(opts):
         transforms.Resize((opts.image_size, opts.image_size)),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
-    train_dataset = CIFAR10(root='.', train=True,  download=True, transform=transform)
-    # train_dataset = FakeData(
-    #     size=1_000_000,
-    #     image_size=(3, 224, 224),
-    #     num_classes=1000,
-    #     transform=transform
-    # )
+    if opts.num
+    if opts.dataset == "cifar10":
+        train_dataset = CIFAR10(
+            root='.', 
+            train=True,  
+            download=True, 
+            transform=transform
+        )
+    elif opts.dataset == "fakedata":
+        train_dataset = FakeData(
+            size=opts.num_images,
+            image_size=(3, opts.image_size, opts.image_size),
+            num_classes=opts.num_classes,
+            transform=transform
+        )
     trainloader = DataLoader(
         train_dataset,
         batch_size=opts.batch_size,
@@ -71,11 +80,10 @@ def get_loss_fn():
 def train(opts, accelerator):
 
     # get everything!
-    device = get_device(accelerator)
+    device     = get_device(accelerator)
     dataloader = get_dataloader(opts)
-    model = get_model(opts)
-    # loss_fn = get_loss_fn(opts)
-    optimizer = get_optimizer(opts, model)
+    model      = get_model(opts)
+    optimizer  = get_optimizer(opts, model)
     
     # Prepare for Accelerate
     model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
@@ -84,8 +92,8 @@ def train(opts, accelerator):
     model.to(device)
 
     # Start training
-    loss = 0.0
     for epoch in range(opts.max_epochs):
+        loss = 0.0
         for batch in tqdm(dataloader, desc=f"[Epoch: {epoch} | Loss: {loss}]"):
             optimizer.zero_grad()
             inputs, targets = batch
@@ -95,32 +103,131 @@ def train(opts, accelerator):
             optimizer.step()
 
 def get_opts():
+
+    # We set random seed, if not mentioned.
+    random_seed = random.randint(1, 1_000_000)
+
     parser = ArgumentParser()
-    parser.add_argument("--max_epochs", default=50, type=int)
-    parser.add_argument('--accelerator', default='auto', type=str, help='Supports passing different accelerator types (“cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”) as well as custom accelerator instances')
-    parser.add_argument('--devices', default=None, type=int, help='Will be mapped to either gpus, tpu_cores, num_processes or ipus, based on the accelerator type')
-    parser.add_argument('--strategy', default=None, type=str, help='Strategy controls the model distribution across training, evaluation, and prediction to be used by the Trainer')
-    parser.add_argument('--precision', default=32, type=Union[int, str], help='Double precision (64), full precision (32), half precision (16) or bfloat16 precision (bf16). Can be used on CPU, GPU, TPUs, HPUs or IPUs. Default: 32')
-    parser.add_argument('--accumulate_grad_batches', default=None, type=int, help='Accumulates grads every k batches or as set up in the dict. Default: None')
-    parser.add_argument("--network", default="resnet50", type=str)
-    parser.add_argument("--num_images", default=1_000_000, type=int)
-    parser.add_argument("--num_classes", default=1000, type=int)
-    parser.add_argument('--batch_size', default=16, type=int, help='Batch size for training')
-    parser.add_argument("--image_size", default=224, type=int, help="The image size of dataset.")
-    parser.add_argument('--workers', default=cpu_count(), type=int, help='Number of train dataloader workers')
-    parser.add_argument('--persistent_workers', default=False, action="store_true")
-    parser.add_argument('--learning_rate', default=0.5, type=float, help='Optimizer learning rate')
-    parser.add_argument('--optim_name', default='adam', type=str, help='Which optimizer to use')
-    parser.add_argument("--reload_dataloaders_every_n_epochs", default=1, type=int, help="Reloads dataloaders after what epoch?")
+    parser.add_argument(
+        "--seed", 
+        default=random_seed, 
+        type=int, 
+        help="Set the seed for reproducible experiments."
+    )
+    parser.add_argument(
+        "--max_epochs", 
+        default=50, 
+        type=int, 
+        help="Set maximum epochs for training."
+    )
+    parser.add_argument(
+        '--accelerator', 
+        default='auto', 
+        type=str, 
+        help='Supports passing different accelerator types (“cpu”, “gpu”, “tpu”, “ipu”, “hpu”, “mps, “auto”) as well as custom accelerator instances'
+    )
+    parser.add_argument(
+        '--devices', 
+        default=None, 
+        type=int, 
+        help='Will be mapped to either gpus, tpu_cores, num_processes or ipus, based on the accelerator type'
+    )
+    parser.add_argument(
+        '--strategy', 
+        default=None, 
+        type=str, 
+        help='Strategy controls the model distribution across training, evaluation, and prediction to be used by the Trainer'
+    )
+    parser.add_argument(
+        '--precision', 
+        default=32, 
+        type=Union[int, str], 
+        help='Double precision (64), full precision (32), half precision (16) or bfloat16 precision (bf16). Can be used on CPU, GPU, TPUs, HPUs or IPUs. Default: 32'
+    )
+    parser.add_argument(
+        '--accumulate_grad_batches', 
+        default=None, 
+        type=int, 
+        help='Accumulates grads every k batches or as set up in the dict. Default: None'
+    )
+    parser.add_argument(
+        "--network", 
+        default="resnet50", 
+        type=str
+    )
+    parser.add_argument(
+        "--dataset",
+        default="cifar10",
+        type=str,
+        help="Select of the following datasets: cifar10, fakedata."
+    )
+    parser.add_argument(
+        "--num_images", 
+        default=1_000_000, 
+        type=int
+    )
+    parser.add_argument(
+        "--num_classes", 
+        default=1000, 
+        type=int
+    )
+    parser.add_argument(
+        '--batch_size', 
+        default=16, 
+        type=int, 
+        help='Batch size for training'
+    )
+    parser.add_argument(
+        "--image_size", 
+        default=224, 
+        type=int, 
+        help="The image size of dataset."
+    )
+    parser.add_argument(
+        '--workers', 
+        default=cpu_count(), 
+        type=int, 
+        help='Number of train dataloader workers'
+    )
+    parser.add_argument(
+        '--persistent_workers', 
+        default=False, 
+        action="store_true"
+    )
+    parser.add_argument(
+        '--learning_rate', 
+        default=0.5, 
+        type=float, 
+        help='Optimizer learning rate'
+    )
+    parser.add_argument(
+        '--optim_name', 
+        default='adam', 
+        type=str, 
+        help='Which optimizer to use'
+    )
+    parser.add_argument(
+        "--reload_dataloaders_every_n_epochs", 
+        default=1, 
+        type=int, 
+        help="Reloads dataloaders after what epoch?"
+    )
     opts = parser.parse_args()
     return opts
 
 def main():
 
+    # Accelerator instance.
     accelerator = Accelerator()
 
     # Get opts
     opts = get_opts()
+    
+    # Set random seed.
+    set_seed(opts.seed)
+
+    # Linearly scale the learning rate based on num_processes (GPUs, TPUs).
+    opts.learning_rate *= accelerator.num_processes
     
     # Begin training
     train(opts, accelerator)
