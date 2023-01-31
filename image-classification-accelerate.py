@@ -248,5 +248,5 @@ def main():
 
     print("OMFG, training finished!")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
