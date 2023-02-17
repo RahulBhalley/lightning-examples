@@ -12,6 +12,11 @@ from multiprocessing import cpu_count
 from argparse import ArgumentParser
 from typing import Union
 
+try:
+    from lion_pytorch import Lion
+except:
+    print("Install lion_pytorch if you want to use Lion optimizer")
+
 print(f"PyTorch version: {torch.__version__}")
 print(f"Lighting version: {pl.__version__}")
 print(f"CPU cores: {cpu_count()}")
@@ -49,7 +54,11 @@ class ImageClassificationAlgorithm(pl.LightningModule):
 
     def configure_optimizers(self):
         if self.opts.optim_name == "adam":
-            return optim.Adam(self.parameters())
+            return optim.Adam(self.parameters(), lr=opts.learning_rate)
+        elif self.opts.optim_name == "adamw":
+            return optim.AdamW(self.parameters(), lr=opts.learning_rate)
+        elif self.opts.optim_name == "lion":
+            return Lion(self.parameters(), lr=opts.learning_rate, use_triton=opts.use_triton)
 
 def get_opts():
     parser = ArgumentParser()
@@ -66,6 +75,7 @@ def get_opts():
     parser.add_argument('--persistent_workers', default=False, action="store_true")
     parser.add_argument('--learning_rate', default=0.5, type=float, help='Optimizer learning rate')
     parser.add_argument('--optim_name', default='adam', type=str, help='Which optimizer to use')
+    parser.add_argument('--use_triton', default=False, type=bool, action="store_true", help='Use triton for Lion to use CUDA kernels')
     parser.add_argument("--reload_dataloaders_every_n_epochs", default=1, type=int, help="Reloads dataloaders after what epoch?")
     opts = parser.parse_args()
     return opts

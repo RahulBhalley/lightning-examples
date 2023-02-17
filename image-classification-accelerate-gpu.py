@@ -15,6 +15,11 @@ from argparse import ArgumentParser
 from typing import Union
 import random
 
+try:
+    from lion_pytorch import Lion
+except:
+    print("Install lion_pytorch if you want to use Lion optimizer")
+
 print(f"PyTorch version: {torch.__version__}")
 print(f"CPU cores: {cpu_count()}")
 
@@ -42,7 +47,11 @@ def get_model(opts):
 
 def get_optimizer(opts, model):
     if opts.optim_name == "adam":
-            return optim.Adam(model.parameters())
+            return optim.Adam(model.parameters(), lr=opts.learning_rate)
+        elif opts.optim_name == "adamw":
+            return optim.AdamW(model.parameters(), lr=opts.learning_rate)
+        elif opts.optim_name == "lion":
+            return Lion(model.parameters(), lr=opts.learning_rate, use_triton=opts.use_triton)
 
 def get_dataloader(opts):
     transform = transforms.Compose([
@@ -218,7 +227,14 @@ def get_opts():
         '--optim_name', 
         default='adam', 
         type=str, 
-        help='Which optimizer to use'
+        help='Which optimizer to use: adam, adamw, lion'
+    )
+    parser.add_argument(
+        '--use_triton', 
+        default=False, 
+        type=bool, 
+        action="store_true", 
+        help='Use triton for Lion to use CUDA kernels'
     )
     parser.add_argument(
         "--reload_dataloaders_every_n_epochs", 
