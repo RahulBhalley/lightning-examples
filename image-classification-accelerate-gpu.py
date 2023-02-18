@@ -37,7 +37,7 @@ def get_model(opts):
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
             out_features=opts.num_classes,
-            bias=model.fc.bias
+            bias=model.fc.bias is not None
         )
     elif opts.network == "resnet34":
         model = models.resnet34(True)
@@ -45,7 +45,7 @@ def get_model(opts):
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
             out_features=opts.num_classes,
-            bias=model.fc.bias
+            bias=model.fc.bias is not None
         )
     elif opts.network == "resnet50":
         model = models.resnet50(True)
@@ -53,7 +53,7 @@ def get_model(opts):
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
             out_features=opts.num_classes, 
-            bias=model.fc.bias
+            bias=model.fc.bias is not None
         )
     elif opts.network == "resnet101":
         model = models.resnet101(True)
@@ -61,7 +61,7 @@ def get_model(opts):
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
             out_features=opts.num_classes, 
-            bias=model.fc.bias
+            bias=model.fc.bias is not None
         )
     elif opts.network == "resnet152":
         model = models.resnet152(True)
@@ -69,7 +69,7 @@ def get_model(opts):
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
             out_features=opts.num_classes, 
-            bias=model.fc.bias
+            bias=model.fc.bias is not None
         )
     elif opts.network == "alexnet":
         model = models.alexnet(True)
