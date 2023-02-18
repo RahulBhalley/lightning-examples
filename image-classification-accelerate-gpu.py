@@ -76,7 +76,7 @@ def get_model(opts):
         # Create a new last layer.
         model.classifier[6] = nn.Linear(
             in_features=model.classifier[6].in_features, 
-            out_features=opts.num_classes,,
+            out_features=opts.num_classes,
             bias=model.classifier[6].bias
         )
     elif opts.network == "mobilenet_v3_small":
