@@ -32,61 +32,61 @@ def get_device(accelerator):
 def get_model(opts):
     model = None
     if opts.network == "resnet18":
-        model = models.resnet18(False)
+        model = models.resnet18(True)
+        # Create a new last layer.
+        model.fc = nn.Linear(
+            in_features=model.fc.in_features, 
+            out_features=opts.num_classes,
+            bias=model.fc.bias
+        )
+    elif opts.network == "resnet34":
+        model = models.resnet34(True)
+        # Create a new last layer.
+        model.fc = nn.Linear(
+            in_features=model.fc.in_features, 
+            out_features=opts.num_classes,
+            bias=model.fc.bias
+        )
+    elif opts.network == "resnet50":
+        model = models.resnet50(True)
         # Create a new last layer.
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
             out_features=opts.num_classes, 
             bias=model.fc.bias
         )
-    elif opts.network == "resnet34":
-        model = models.resnet34(False)
-        # Create a new last layer.
-        model.fc = nn.Linear(
-            in_features=model.fc.in_features, 
-            out_features=opts.num_classes 
-            bias=model.fc.bias
-        )
-    elif opts.network == "resnet50":
-        model = models.resnet50(False)
-        # Create a new last layer.
-        model.fc = nn.Linear(
-            in_features=model.fc.in_features, 
-            out_features=opts.num_classes 
-            bias=model.fc.bias
-        )
     elif opts.network == "resnet101":
-        model = models.resnet101(False)
+        model = models.resnet101(True)
         # Create a new last layer.
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
-            out_features=opts.num_classes 
+            out_features=opts.num_classes, 
             bias=model.fc.bias
         )
     elif opts.network == "resnet152":
-        model = models.resnet152(False)
+        model = models.resnet152(True)
         # Create a new last layer.
         model.fc = nn.Linear(
             in_features=model.fc.in_features, 
-            out_features=opts.num_classes 
+            out_features=opts.num_classes, 
             bias=model.fc.bias
         )
     elif opts.network == "alexnet":
-        model = models.alexnet(False)
+        model = models.alexnet(True)
         # Create a new last layer.
         model.classifier[6] = nn.Linear(
             in_features=model.classifier[6].in_features, 
-            out_features=opts.num_classes,
+            out_features=opts.num_classes,,
             bias=model.classifier[6].bias
         )
     elif opts.network == "mobilenet_v3_small":
-        model = models.mobilenet_v3_small(False)
+        model = models.mobilenet_v3_small(True)
     elif opts.network == "efficientnet_b0":
-        model = models.efficientnet_b0(False)
+        model = models.efficientnet_b0(True)
     elif opts.network == "efficientnet_b5":
-        model = models.efficientnet_b5(False)
+        model = models.efficientnet_b5(True)
     elif opts.network == "efficientnet_b7":
-        model = models.efficientnet_b7(False)
+        model = models.efficientnet_b7(True)
         # Create a new last layer.
         # model.
 
