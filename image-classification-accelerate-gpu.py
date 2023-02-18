@@ -1,7 +1,7 @@
 import torch
 from torch import nn, optim
 import torch.nn.functional as F
-from torchvision.datasets import CIFAR10, FakeData, CelebA
+from torchvision import datasets
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, models
 from accelerate import Accelerator
@@ -64,14 +64,21 @@ def get_dataloader(opts):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     if opts.dataset == "cifar10":
-        train_dataset = CIFAR10(
+        train_dataset = datasets.CIFAR10(
             root='.', 
             train=True,  
             download=True, 
             transform=transform
         )
+    elif opts.dataset == "oxfordiiitpet":
+        train_dataset = datasets.OxfordIIITPet(
+            root='.',
+            split='trainval',
+            download=True,
+            transform=transform
+        )
     elif opts.dataset == "fakedata":
-        train_dataset = FakeData(
+        train_dataset = datasets.FakeData(
             size=opts.num_images,
             image_size=(3, opts.image_size, opts.image_size),
             num_classes=opts.num_classes,
