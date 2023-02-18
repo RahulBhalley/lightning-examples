@@ -7,12 +7,14 @@ from torchvision import transforms, models
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 # from efficientnet_pytorch import EfficientNet
+import numpy as np
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 # from tqdm.notebook import trange
 import os
 from multiprocessing import cpu_count
 from argparse import ArgumentParser
-from typing import Union
+from typing import Union, OrderedDict
 import random
 
 try:
@@ -28,7 +30,9 @@ def get_device(accelerator):
     return accelerator.device
 
 def get_model(opts):
-    if opts.network == "resnet34":
+    if opts.network == "resnet18":
+        return models.resnet18(False)
+    elif opts.network == "resnet34":
         return models.resnet34(False)
     elif opts.network == "resnet50":
         return models.resnet50(False)
@@ -47,11 +51,11 @@ def get_model(opts):
 
 def get_optimizer(opts, model):
     if opts.optim_name == "adam":
-            return optim.Adam(model.parameters(), lr=opts.learning_rate)
-        elif opts.optim_name == "adamw":
-            return optim.AdamW(model.parameters(), lr=opts.learning_rate)
-        elif opts.optim_name == "lion":
-            return Lion(model.parameters(), lr=opts.learning_rate, use_triton=opts.use_triton)
+        return optim.Adam(model.parameters(), lr=opts.learning_rate)
+    elif opts.optim_name == "adamw":
+        return optim.AdamW(model.parameters(), lr=opts.learning_rate)
+    elif opts.optim_name == "lion":
+        return Lion(model.parameters(), lr=opts.learning_rate / opts.learning_rate_downscale, use_triton=opts.use_triton)
 
 def get_dataloader(opts):
     transform = transforms.Compose([
@@ -86,7 +90,7 @@ def get_dataloader(opts):
 def get_loss_fn():
     pass
 
-def train(opts, accelerator):
+def train(opts, accelerator, losses):
 
     # get everything!
     device     = get_device(accelerator)
@@ -110,6 +114,7 @@ def train(opts, accelerator):
             inputs, targets = batch
             preds = model(inputs)
             loss = F.cross_entropy(preds, targets)
+            losses.append(loss.item())
 
             # Downscale the loss to account for accumulation steps.
             loss /= opts.gradient_accumulation_steps
@@ -124,6 +129,7 @@ def train(opts, accelerator):
 
                 # Also set the opimizer gradients to zero again. :)
                 optimizer.zero_grad()
+    return losses
 
 def get_opts():
 
@@ -219,9 +225,15 @@ def get_opts():
     )
     parser.add_argument(
         '--learning_rate', 
-        default=0.5, 
+        default=1e-3, 
         type=float, 
         help='Optimizer learning rate'
+    )
+    parser.add_argument(
+        '--learning_rate_downscale', 
+        default=3, 
+        type=float, 
+        help='The value by which learning rate should be scaled down. (Only applicable for LION optimizer)'
     )
     parser.add_argument(
         '--optim_name', 
@@ -231,8 +243,7 @@ def get_opts():
     )
     parser.add_argument(
         '--use_triton', 
-        default=False, 
-        type=bool, 
+        default=False,
         action="store_true", 
         help='Use triton for Lion to use CUDA kernels'
     )
@@ -244,6 +255,19 @@ def get_opts():
     )
     opts = parser.parse_args()
     return opts
+
+def plot_and_save(losses, opts):
+
+    # naming.
+    name = f'./losses-optim={opts.optim_name}-lr={opts.learning_rate}'
+
+    # Save loss array.
+    np.save(f'{name}.npy', np.array(losses))
+
+    # Plot and save the plot.
+    plt.plot(losses)
+    plt.savefig(f'{name}.pdf')
+    plt.close()
 
 def main():
 
@@ -258,9 +282,15 @@ def main():
 
     # Linearly scale the learning rate based on num_processes (GPUs, TPUs).
     opts.learning_rate *= accelerator.num_processes
+
+    # Track loss
+    losses = []
     
     # Begin training
-    train(opts, accelerator)
+    losses = train(opts, accelerator, losses)
+
+    # Plot the graph
+    plot_and_save(losses, opts)
 
     print("OMFG, training finished!")
 
