@@ -30,24 +30,67 @@ def get_device(accelerator):
     return accelerator.device
 
 def get_model(opts):
+    model = None
     if opts.network == "resnet18":
-        return models.resnet18(False)
+        model = models.resnet18(False)
+        # Create a new last layer.
+        model.fc = nn.Linear(
+            in_features=model.fc.in_features, 
+            out_features=opts.num_classes, 
+            bias=model.fc.bias
+        )
     elif opts.network == "resnet34":
-        return models.resnet34(False)
+        model = models.resnet34(False)
+        # Create a new last layer.
+        model.fc = nn.Linear(
+            in_features=model.fc.in_features, 
+            out_features=opts.num_classes 
+            bias=model.fc.bias
+        )
     elif opts.network == "resnet50":
-        return models.resnet50(False)
+        model = models.resnet50(False)
+        # Create a new last layer.
+        model.fc = nn.Linear(
+            in_features=model.fc.in_features, 
+            out_features=opts.num_classes 
+            bias=model.fc.bias
+        )
+    elif opts.network == "resnet101":
+        model = models.resnet101(False)
+        # Create a new last layer.
+        model.fc = nn.Linear(
+            in_features=model.fc.in_features, 
+            out_features=opts.num_classes 
+            bias=model.fc.bias
+        )
     elif opts.network == "resnet152":
-        return models.resnet152(False)
+        model = models.resnet152(False)
+        # Create a new last layer.
+        model.fc = nn.Linear(
+            in_features=model.fc.in_features, 
+            out_features=opts.num_classes 
+            bias=model.fc.bias
+        )
     elif opts.network == "alexnet":
-        return models.alexnet(False)
+        model = models.alexnet(False)
+        # Create a new last layer.
+        model.classifier[6] = nn.Linear(
+            in_features=model.classifier[6].in_features, 
+            out_features=opts.num_classes,
+            bias=model.classifier[6].bias
+        )
     elif opts.network == "mobilenet_v3_small":
-        return models.mobilenet_v3_small(False)
+        model = models.mobilenet_v3_small(False)
     elif opts.network == "efficientnet_b0":
-        return models.efficientnet_b0(False)
+        model = models.efficientnet_b0(False)
     elif opts.network == "efficientnet_b5":
-        return models.efficientnet_b5(False)
+        model = models.efficientnet_b5(False)
     elif opts.network == "efficientnet_b7":
-        return models.efficientnet_b7(False)
+        model = models.efficientnet_b7(False)
+        # Create a new last layer.
+        # model.
+
+    return model
 
 def get_optimizer(opts, model):
     if opts.optim_name == "adam":
