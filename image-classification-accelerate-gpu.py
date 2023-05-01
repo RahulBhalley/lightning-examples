@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, models
 from accelerate import Accelerator
 from accelerate.utils import set_seed
+import bitsandbytes as bnb
 # from efficientnet_pytorch import EfficientNet
 import numpy as np
 import matplotlib.pyplot as plt
@@ -97,6 +98,7 @@ def get_optimizer(opts, model):
         return optim.Adam(model.parameters(), lr=opts.learning_rate)
     elif opts.optim_name == "adamw":
         return optim.AdamW(model.parameters(), lr=opts.learning_rate)
+        # return bnb.optim.AdamW8bit(model.parameters(), lr=opts.learning_rate)
     elif opts.optim_name == "lion":
         return Lion(model.parameters(), lr=opts.learning_rate / opts.learning_rate_downscale, use_triton=opts.use_triton)
 
@@ -338,11 +340,11 @@ def main():
     
     # Begin training
     losses = train(opts, accelerator, losses)
+    print("OMFG, training finished!")
 
     # Plot the graph
     plot_and_save(losses, opts)
 
-    print("OMFG, training finished!")
 
 if __name__ == "__main__":
     main()
