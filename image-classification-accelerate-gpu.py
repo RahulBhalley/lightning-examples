@@ -7,6 +7,7 @@ from torchvision import transforms, models
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 import bitsandbytes as bnb
+from torch.utils.tensorboard import SummaryWriter
 # from efficientnet_pytorch import EfficientNet
 import numpy as np
 import matplotlib.pyplot as plt
@@ -142,7 +143,7 @@ def get_dataloader(opts):
 def get_loss_fn():
     pass
 
-def train(opts, accelerator, losses):
+def train(opts, accelerator, losses, writer: SummaryWriter):
 
     # get everything!
     device     = get_device(accelerator)
@@ -182,8 +183,11 @@ def train(opts, accelerator, losses):
                 # just update the weights now.
                 optimizer.step()
 
-                # Also set the opimizer gradients to zero again. :)
+                # Also set the optimizer gradients to zero again. :)
                 optimizer.zero_grad()
+                
+            if batch_idx % 10 == 0:
+                writer.add_scalar("Loss/train", loss.item(), epoch * len(dataloader) + batch_idx)
     return losses
 
 def get_opts():
@@ -326,6 +330,9 @@ def plot_and_save(losses, opts):
 
 def main():
 
+    # TensorBoard writer
+    writer = SummaryWriter()
+
     # Accelerator instance.
     accelerator = Accelerator()
 
@@ -342,8 +349,11 @@ def main():
     losses = []
     
     # Begin training
-    losses = train(opts, accelerator, losses)
+    losses = train(opts, accelerator, losses, writer)
     print("OMFG, training finished!")
+
+    # Close the writer
+    writer.close()
 
     # Plot the graph
     plot_and_save(losses, opts)
