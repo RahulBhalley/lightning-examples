@@ -149,6 +149,9 @@ def train(opts, accelerator, losses):
     dataloader = get_dataloader(opts)
     model      = get_model(opts)
     optimizer  = get_optimizer(opts, model)
+
+    print(f"device: {device}")
+    print(f"dataloader: {len(dataloader)}")
     
     # Prepare for Accelerate
     model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
